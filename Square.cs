@@ -6,37 +6,37 @@ using System.Threading.Tasks;
 
 namespace WebSocketAndNetCore.Web
 {
-    public class Square
+    public class PokerCard
     {
         public int Id { get; set; }
         public string Color { get; set; }
 
-        public static IEnumerable<Square> GetInitialSquares()
+        public static IEnumerable<PokerCard> GetInitialPokerCards()
         {
             var colors = new string[] { "red", "green", "blue" };
-            var squares = new List<Square>();
+            var pokerCards = new List<PokerCard>();
             for (int i = 0; i < 10; i++)
             {
                 var random = new Random();
-                squares.Add(new Square()
+                pokerCards.Add(new PokerCard()
                 {
                     Id = i,
                     Color = colors[(random.Next(1, 3)) - 1]
                 });
             }
-            return squares;
+            return pokerCards;
         }
     }
 
-    public class SquareChangeRequest
+    public class PokerCardChangeRequest
     {
         public int Id { get; set; }
         public string Color { get; set; }
         public string Name { get; set; }
 
-        public static SquareChangeRequest FromJson(string json)
+        public static PokerCardChangeRequest FromJson(string json)
         {
-            return JsonConvert.DeserializeObject<SquareChangeRequest>(json);
+            return JsonConvert.DeserializeObject<PokerCardChangeRequest>(json);
         }
     }
 }

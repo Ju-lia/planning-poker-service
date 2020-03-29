@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace WebSocketAndNetCore.Web
 {
-    public class SquareService
+    public class PokerCardService
     {
         private ConcurrentDictionary<string, WebSocket> _users = new ConcurrentDictionary<string, WebSocket>();
-        private List<Square> _squares = new List<Square>(Square.GetInitialSquares());
+        private List<PokerCard> _pokerCards = new List<PokerCard>(PokerCard.GetInitialPokerCards());
         public async Task AddUser(WebSocket socket)
         {
             try
@@ -23,10 +23,10 @@ namespace WebSocketAndNetCore.Web
                     name = GenerateName();
                     userAddedSuccessfully = _users.TryAdd(name, socket);
                 }
-                
+
                 GiveUserTheirName(name, socket).Wait();
                 AnnounceNewUser(name).Wait();
-                SendSquares(socket).Wait();
+                SendPokerCards(socket).Wait();
                 while (socket.State == WebSocketState.Open)
                 {
                     var buffer = new byte[1024 * 4];
@@ -40,8 +40,8 @@ namespace WebSocketAndNetCore.Web
                     var bufferAsString = System.Text.Encoding.ASCII.GetString(package.ToArray());
                     if (!string.IsNullOrEmpty(bufferAsString))
                     {
-                        var changeRequest = SquareChangeRequest.FromJson(bufferAsString);
-                        await HandleSquareChangeRequest(changeRequest);
+                        var changeRequest = PokerCardChangeRequest.FromJson(bufferAsString);
+                        await HandlePokerCardChangeRequest(changeRequest);
                     }
                 }
                 await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
@@ -62,12 +62,12 @@ namespace WebSocketAndNetCore.Web
             return name;
         }
 
-        private async Task SendSquares(WebSocket socket)
+        private async Task SendPokerCards(WebSocket socket)
         {
-            var message = new SocketMessage<List<Square>>()
+            var message = new SocketMessage<List<PokerCard>>()
             {
-                MessageType = "squares",
-                Payload = _squares
+                MessageType = "pokerCards",
+                Payload = _pokerCards
             };
 
             await Send(message.ToJson(), socket);
@@ -109,30 +109,30 @@ namespace WebSocketAndNetCore.Web
             await SendAll(message.ToJson());
         }
 
-        private async Task AnnounceSquareChange(SquareChangeRequest request)
+        private async Task AnnouncePokerCardChange(PokerCardChangeRequest request)
         {
             var message = new SocketMessage<string>
             {
                 MessageType = "announce",
-                Payload = $"{request.Name} has changed square #{request.Id} to {request.Color}"
+                Payload = $"{request.Name} has changed poker-card #{request.Id} to {request.Color}"
             };
             await SendAll(message.ToJson());
         }
 
-        private async Task HandleSquareChangeRequest(SquareChangeRequest request)
+        private async Task HandlePokerCardChangeRequest(PokerCardChangeRequest request)
         {
-            var theSquare = _squares.First(sq => sq.Id == request.Id);
-            theSquare.Color = request.Color;
-            await SendSquaresToAll();
-            await AnnounceSquareChange(request);
+            var thePokerCard = _pokerCards.First(sq => sq.Id == request.Id);
+            thePokerCard.Color = request.Color;
+            await SendPokerCardsToAll();
+            await AnnouncePokerCardChange(request);
         }
 
-        private async Task SendSquaresToAll()
+        private async Task SendPokerCardsToAll()
         {
-            var message = new SocketMessage<List<Square>>()
+            var message = new SocketMessage<List<PokerCard>>()
             {
-                MessageType = "squares",
-                Payload = _squares
+                MessageType = "pokerCards",
+                Payload = _pokerCards
             };
 
             await SendAll(message.ToJson());

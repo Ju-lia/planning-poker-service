@@ -27,7 +27,7 @@ namespace WebSocketAndNetCore.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddSingleton(typeof(SquareService), new SquareService());
+            services.AddSingleton(typeof(PokerCardService), new PokerCardService());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -59,8 +59,8 @@ namespace WebSocketAndNetCore.Web
                     if (context.WebSockets.IsWebSocketRequest)
                     {
                         var socket = await context.WebSockets.AcceptWebSocketAsync();
-                        var squareService = (SquareService)app.ApplicationServices.GetService(typeof(SquareService));
-                        await squareService.AddUser(socket);
+                        var pokerCardService = (PokerCardService)app.ApplicationServices.GetService(typeof(PokerCardService));
+                        await pokerCardService.AddUser(socket);
                     }
                     else
                     {
