@@ -114,15 +114,24 @@ namespace WebSocketAndNetCore.Web
             var message = new SocketMessage<string>
             {
                 MessageType = "announce",
-                Payload = $"{request.Name} has changed poker-card #{request.Id} to {request.Color}"
+                Payload = $"{request.Name} has changed poker-card to {request.Value}"
             };
             await SendAll(message.ToJson());
         }
 
         private async Task HandlePokerCardChangeRequest(PokerCardChangeRequest request)
         {
-            var thePokerCard = _pokerCards.First(sq => sq.Id == request.Id);
-            thePokerCard.Color = request.Color;
+            var thePokerCard = _pokerCards.FirstOrDefault(sq => sq.Name == request.Name);
+            if (thePokerCard == null)
+            {
+                thePokerCard = new PokerCard()
+                {
+                    Disabled = request.Disabled,
+                    Name = request.Name
+                };
+                _pokerCards.Add(thePokerCard);
+            }
+            thePokerCard.Value = request.Value;
             await SendPokerCardsToAll();
             await AnnouncePokerCardChange(request);
         }
